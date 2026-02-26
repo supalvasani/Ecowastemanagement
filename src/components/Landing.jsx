@@ -77,30 +77,6 @@ export default function LandingPage() {
                 <div className="absolute top-40 right-10 w-72 h-72 bg-green-300 rounded-full mix-blend-multiply filter blur-xl opacity-20"></div>
             </section>
 
-            {/* Stats Section */}
-            <section className="py-16 bg-white border-y border-gray-100">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
-                        <div>
-                            <div className="text-4xl font-bold text-green-600 mb-2">10K+</div>
-                            <div className="text-gray-600">Happy Customers</div>
-                        </div>
-                        <div>
-                            <div className="text-4xl font-bold text-green-600 mb-2">500+</div>
-                            <div className="text-gray-600">Business Partners</div>
-                        </div>
-                        <div>
-                            <div className="text-4xl font-bold text-green-600 mb-2">₹5Cr+</div>
-                            <div className="text-gray-600">Paid to Suppliers</div>
-                        </div>
-                        <div>
-                            <div className="text-4xl font-bold text-green-600 mb-2">100%</div>
-                            <div className="text-gray-600">GPCB Compliant</div>
-                        </div>
-                    </div>
-                </div>
-            </section>
-
             {/* How It Works Section */}
             <section id="how-it-works" className="py-24 bg-gray-50">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -155,8 +131,8 @@ export default function LandingPage() {
                         <p className="text-xl text-gray-600 max-w-2xl mx-auto">Tailored solutions for every need</p>
                     </div>
                     <div className="grid md:grid-cols-2 gap-10">
-                        <Card className="group hover:shadow-2xl transition-all duration-300 border-2 hover:border-green-200 overflow-hidden">
-                            <CardContent className="p-10">
+                        <Card className="group hover:shadow-2xl transition-all duration-300 border-2 hover:border-green-200 overflow-hidden h-full">
+                            <CardContent className="p-10 flex flex-col h-full">
                                 <div className="w-20 h-20 bg-gradient-to-br from-green-100 to-green-200 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
                                     <Users className="w-10 h-10 text-green-600" />
                                 </div>
@@ -164,7 +140,7 @@ export default function LandingPage() {
                                 <p className="text-gray-600 mb-6 text-lg leading-relaxed">
                                     Turn your household waste into cash! We buy paper, plastic, glass, and more with transparent pricing and instant digital payments.
                                 </p>
-                                <ul className="space-y-3 mb-6">
+                                <ul className="space-y-3 mb-6 flex-1">
                                     <li className="flex items-center text-gray-700">
                                         <CheckCircle className="w-5 h-5 mr-3 text-green-600" />
                                         Instant digital payments
@@ -178,14 +154,14 @@ export default function LandingPage() {
                                         Doorstep pickup service
                                     </li>
                                 </ul>
-                                <Button asChild className="w-full bg-green-600 hover:bg-green-700 text-lg py-6">
+                                <Button asChild className="w-full bg-green-600 hover:bg-green-700 text-lg py-6 mt-auto">
                                     <Link to={createPageUrl("Residential")}>Get Started</Link>
                                 </Button>
                             </CardContent>
                         </Card>
 
-                        <Card className="group hover:shadow-2xl transition-all duration-300 border-2 hover:border-green-200 overflow-hidden">
-                            <CardContent className="p-10">
+                        <Card className="group hover:shadow-2xl transition-all duration-300 border-2 hover:border-green-200 overflow-hidden h-full">
+                            <CardContent className="p-10 flex flex-col h-full">
                                 <div className="w-20 h-20 bg-gradient-to-br from-green-100 to-green-200 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
                                     <Factory className="w-10 h-10 text-green-600" />
                                 </div>
@@ -193,7 +169,7 @@ export default function LandingPage() {
                                 <p className="text-gray-600 mb-6 text-lg leading-relaxed">
                                     GPCB-compliant disposal for hospitals, factories, and offices. Full documentation and certificates for your CSR reporting.
                                 </p>
-                                <ul className="space-y-3 mb-6">
+                                <ul className="space-y-3 mb-6 flex-1">
                                     <li className="flex items-center text-gray-700">
                                         <CheckCircle className="w-5 h-5 mr-3 text-green-600" />
                                         GPCB certified disposal
@@ -207,7 +183,7 @@ export default function LandingPage() {
                                         Biomedical waste handling
                                     </li>
                                 </ul>
-                                <Button asChild className="w-full bg-green-600 hover:bg-green-700 text-lg py-6">
+                                <Button asChild className="w-full bg-green-600 hover:bg-green-700 text-lg py-6 mt-auto">
                                     <Link to={createPageUrl("Business")}>Request Service</Link>
                                 </Button>
                             </CardContent>
@@ -256,27 +232,6 @@ export default function LandingPage() {
                             <p className="text-gray-600">Detailed sustainability reports for your business goals</p>
                         </div>
                     </div>
-                </div>
-            </section>
-
-            {/* CTA Section */}
-            <section className="py-24 bg-gradient-to-r from-green-600 to-green-500">
-                <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-                    <h2 className="text-4xl md:text-5xl font-extrabold text-white mb-6">
-                        Ready to Make a Difference?
-                    </h2>
-                    <p className="text-xl text-green-50 mb-10">
-                        Join thousands of households and businesses making waste management rewarding and responsible
-                    </p>
-                    <Button asChild size="lg" className="bg-white text-green-600 hover:bg-gray-100 px-12 py-6 text-lg shadow-2xl">
-                        <Link to={createPageUrl("Residential")}>
-                            {/* FIX: Wrap content in <span> to ensure <Button asChild> sees one child content block */}
-                            <span className="flex items-center">
-                                Get Started Today
-                                <ArrowRight className="w-5 h-5 ml-2" />
-                            </span>
-                        </Link>
-                    </Button>
                 </div>
             </section>
         </>
