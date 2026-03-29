@@ -10,6 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import toast from "react-hot-toast";
 import { Home, DollarSign, Sparkles, CheckCircle } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
+import { api } from "@/lib/api";
 
 export default function ResidentialPage() {
     const navigate = useNavigate();
@@ -27,11 +28,11 @@ export default function ResidentialPage() {
     useEffect(() => {
         // Pre-fill the name field with the authenticated user's name
         if (user) {
-            setFormData(prev => ({ ...prev, name: user }));
+            setFormData(prev => ({ ...prev, name: user.fullName }));
         }
     }, [user]);
 
-    const handleFormSubmit = (e) => {
+    const handleFormSubmit = async (e) => {
         e.preventDefault();
         setIsSubmitting(true);
 
@@ -42,24 +43,22 @@ export default function ResidentialPage() {
             return;
         }
 
-        const newRequest = {
-            id: Date.now(),
-            ...formData,
-            type: 'Household',
-            status: 'confirmed',
-            createdDate: new Date().toISOString()
-        };
+        try {
+            await api.createResidential({
+                address: formData.address,
+                phone: formData.phone,
+                wasteType: formData.wasteType,
+                pickupDate: formData.pickupDate,
+                estimatedWeight: formData.estimatedWeight,
+            });
 
-        const existingRequests = JSON.parse(localStorage.getItem('ecowaste_requests') || '[]');
-        localStorage.setItem('ecowaste_requests', JSON.stringify([...existingRequests, newRequest]));
-
-        setIsSubmitting(false);
-        toast.success("🎉 Pickup Scheduled Successfully! Your slot has been booked. We'll contact you shortly to confirm the details.");
-
-
-        setTimeout(() => {
+            toast.success("Pickup scheduled successfully");
             navigate(createPageUrl("Dashboard"));
-        }, 2000);
+        } catch (error) {
+            toast.error(error.message || "Failed to schedule pickup");
+        } finally {
+            setIsSubmitting(false);
+        }
     };
 
     const handleInputChange = (field, value) => {
@@ -76,7 +75,7 @@ export default function ResidentialPage() {
     }
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-green-50 to-white py-12">
+        <div className="min-h-screen bg-linear-to-br from-green-50 to-white py-12">
             <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div className="text-center mb-12">
                     <div className="inline-flex items-center gap-2 px-4 py-2 bg-green-100 rounded-full text-green-700 font-medium mb-4">
@@ -124,7 +123,7 @@ export default function ResidentialPage() {
 
                     <div className="lg:col-span-2">
                         <Card className="shadow-2xl border-2">
-                            <CardHeader className="border-b bg-gradient-to-r from-green-50 to-green-100">
+                            <CardHeader className="border-b bg-linear-to-r from-green-50 to-green-100">
                                 <CardTitle className="text-2xl">Schedule Your Pickup</CardTitle>
                                 <p className="text-gray-600 text-sm">Fill in your details and we'll handle the rest</p>
                             </CardHeader>

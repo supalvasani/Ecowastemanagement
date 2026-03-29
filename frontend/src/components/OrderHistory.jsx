@@ -1,14 +1,29 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
-import { getRequestsByUserName } from "@/lib/utils";
 import { useAuth } from "@/contexts/AuthContext";
 import { Badge } from "@/components/ui/badge";
 import { XCircle, CheckCircle, Clock } from "lucide-react";
+import { api } from "@/lib/api";
 
 export default function OrderHistory() {
     const { user } = useAuth();
-    const allRequests = getRequestsByUserName(user);
-    const sortedRequests = allRequests.sort((a, b) => new Date(b.createdDate) - new Date(a.createdDate));
+    const [orders, setOrders] = useState([]);
+
+    useEffect(() => {
+        async function loadOrders() {
+            if (!user?.id) return;
+            try {
+                const response = await api.getOrdersByUser();
+                setOrders(response);
+            } catch {
+                setOrders([]);
+            }
+        }
+
+        loadOrders();
+    }, [user?.id]);
+
+    const sortedRequests = [...orders].sort((a, b) => new Date(b.createdDate) - new Date(a.createdDate));
 
     const getStatusInfo = (status) => {
         switch (status.toLowerCase()) {
@@ -18,6 +33,8 @@ export default function OrderHistory() {
                 return { text: "Confirmed", color: "text-blue-500", badgeClass: "bg-blue-100 text-blue-800", icon: Clock };
             case 'pending':
                 return { text: "Pending", color: "text-yellow-500", badgeClass: "bg-yellow-100 text-yellow-800", icon: Clock };
+            case 'in_progress':
+                return { text: "In Progress", color: "text-indigo-500", badgeClass: "bg-indigo-100 text-indigo-800", icon: Clock };
             default:
                 return { text: "Cancelled", color: "text-red-500", badgeClass: "bg-red-100 text-red-800", icon: XCircle };
         }
@@ -45,7 +62,7 @@ export default function OrderHistory() {
                                 <p className="font-semibold text-gray-800 capitalize text-lg">
                                     {order.type === 'Household' ?
                                         `Residential Pickup: ${order.wasteType}` :
-                                        `Business Request: ${order.companyName || 'N/A'}`
+                                        `${order.type} Request: ${order.companyName || 'N/A'}`
                                     }
                                 </p>
                                 <p className="text-sm text-gray-500">

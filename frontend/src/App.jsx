@@ -10,6 +10,7 @@ import Pricing from "@/components/Pricing";
 import OrderHistory from "@/components/OrderHistory";
 import Landing from "@/components/Landing";
 import LoginForm from "@/components/login-form";
+import RegisterForm from "@/components/register-form";
 import { ProtectedRoute } from "@/components/common/ProtectedRoute";
 
 export default function App() {
@@ -18,6 +19,7 @@ export default function App() {
             <Routes>
                 <Route path="/" element={<Landing />} />
                 <Route path="/login" element={<LoginForm />} />
+                <Route path="/register" element={<RegisterForm />} />
                 <Route path="/about" element={<About />} />
 
                 {/* Protected Routes - require login */}

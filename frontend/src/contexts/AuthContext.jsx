@@ -6,7 +6,14 @@ export function AuthProvider({ children }) {
     // Initialize user state from localStorage for persistence
     const [user, setUser] = useState(() => {
         if (typeof window !== 'undefined') {
-            return localStorage.getItem('ecowaste_user');
+            const stored = localStorage.getItem('ecowaste_user');
+            return stored ? JSON.parse(stored) : null;
+        }
+        return null;
+    });
+    const [token, setToken] = useState(() => {
+        if (typeof window !== 'undefined') {
+            return localStorage.getItem('ecowaste_token');
         }
         return null;
     });
@@ -14,17 +21,32 @@ export function AuthProvider({ children }) {
     // Sync user state with localStorage whenever it changes
     useEffect(() => {
         if (user) {
-            localStorage.setItem('ecowaste_user', user);
+            localStorage.setItem('ecowaste_user', JSON.stringify(user));
         } else {
             localStorage.removeItem('ecowaste_user');
         }
     }, [user]);
 
-    const login = (username) => setUser(username);
-    const logout = () => setUser(null);
+    useEffect(() => {
+        if (token) {
+            localStorage.setItem('ecowaste_token', token);
+        } else {
+            localStorage.removeItem('ecowaste_token');
+        }
+    }, [token]);
+
+    const login = ({ user: userPayload, token: tokenPayload }) => {
+        setUser(userPayload);
+        setToken(tokenPayload);
+    };
+
+    const logout = () => {
+        setUser(null);
+        setToken(null);
+    };
 
     return (
-        <AuthContext.Provider value={{ user, login, logout }}>
+        <AuthContext.Provider value={{ user, token, login, logout }}>
             {children}
         </AuthContext.Provider>
     );

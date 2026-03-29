@@ -61,7 +61,7 @@ export default function Layout({ children }) {
                             <>
                                 <div className="flex items-center border border-green-600 px-3 py-1 rounded-full">
                                     <User className="w-4 h-4 text-green-600 mr-2" />
-                                    <span className="text-green-700 font-medium">{user}</span>
+                                    <span className="text-green-700 font-medium">{user.fullName}</span>
                                 </div>
                                 <Button
                                     onClick={handleLogout}
@@ -128,7 +128,7 @@ export default function Layout({ children }) {
             </header>
 
             {/* Main Page */}
-            <main className="flex-grow">{children}</main>
+            <main className="grow">{children}</main>
 
             {/* Footer */}
             <footer className="bg-gray-900 text-gray-300 mt-10">

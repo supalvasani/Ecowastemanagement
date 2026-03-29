@@ -1,10 +1,10 @@
-import React, { useMemo } from "react";
+import React, { useEffect, useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
-import { createPageUrl, getRequestsByUserName } from "@/lib/utils";
+import { createPageUrl } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import {
     CalendarCheck,
     Truck,
@@ -12,77 +12,52 @@ import {
     Target,
     Users,
     ArrowRight,
-    Loader2
+    Loader2,
 } from "lucide-react";
-
-// Mock pricing/weight values for calculation
-const WASTE_PRICING = {
-    paper: 12, // Rs/kg
-    plastic: 20,
-    glass: 5,
-    mixed: 15,
-};
-
-function calculateMetrics(requests) {
-    let totalWeight = 0;
-    let totalEarning = 0;
-    let pendingCount = 0;
-    let completedCount = 0;
-
-    requests.forEach(req => {
-        // Simple heuristic to extract estimated weight from text field like "5-10 kg"
-        const weightMatch = req.estimatedWeight?.match(/(\d+)/);
-        const weight = weightMatch ? parseInt(weightMatch[1]) : 0;
-        totalWeight += weight;
-
-        // Calculate potential earnings only for Household users
-        if (req.type === 'Household' && (req.status === 'confirmed' || req.status === 'completed')) {
-            const pricePerKg = WASTE_PRICING[req.wasteType] || 0;
-            totalEarning += weight * pricePerKg;
-        }
-
-        if (req.status === 'pending' || req.status === 'confirmed') {
-            pendingCount++;
-        } else if (req.status === 'completed') {
-            completedCount++;
-        }
-    });
-
-    const upcomingRequests = requests
-        .filter(req => req.status === 'confirmed' || req.status === 'pending')
-        .sort((a, b) => new Date(a.pickupDate || a.createdDate) - new Date(b.pickupDate || b.createdDate));
-
-    // Find the next scheduled pickup date
-    const nextPickup = upcomingRequests[0];
-
-    return {
-        totalWeight,
-        totalEarning,
-        pendingCount,
-        completedCount,
-        nextPickup,
-        requests
-    };
-}
-
+import { api } from "@/lib/api";
 
 export default function Dashboard() {
     const { user } = useAuth();
+    const [loading, setLoading] = useState(true);
+    const [dashboardData, setDashboardData] = useState({
+        metrics: {
+            totalWeight: 0,
+            totalEarning: 0,
+            pendingCount: 0,
+            completedCount: 0,
+            totalRequests: 0,
+        },
+        nextPickup: null,
+        requests: [],
+    });
 
-    // Fetch and calculate metrics
-    const allRequests = getRequestsByUserName(user);
-    const {
-        totalWeight,
-        totalEarning,
-        pendingCount,
-        completedCount,
-        nextPickup,
-        requests
-    } = useMemo(() => calculateMetrics(allRequests), [allRequests, user]);
+    useEffect(() => {
+        async function loadDashboard() {
+            if (!user?.id) return;
+            setLoading(true);
+            try {
+                const response = await api.getDashboard();
+                setDashboardData(response);
+            } catch {
+                setDashboardData((prev) => ({ ...prev, requests: [] }));
+            } finally {
+                setLoading(false);
+            }
+        }
 
-    // Determine user type for dynamic actions and metrics display
-    const isHouseholdUser = allRequests.some(r => r.type === 'Household');
-    const isBusinessUser = allRequests.some(r => r.type === 'Business');
+        loadDashboard();
+    }, [user?.id]);
+
+    const { metrics, nextPickup, requests } = dashboardData;
+
+    const totalWeight = metrics.totalWeight || 0;
+    const totalEarning = metrics.totalEarning || 0;
+    const pendingCount = metrics.pendingCount || 0;
+    const completedCount = metrics.completedCount || 0;
+    const totalRequests = metrics.totalRequests || 0;
+
+    const isHouseholdUser = requests.some((r) => r.type === 'Household');
+    const isBusinessUser = requests.some((r) => r.type === 'Business' || r.type === 'Enterprise');
 
     if (!user) {
         return (
@@ -95,9 +70,16 @@ export default function Dashboard() {
     return (
         <div className="min-h-screen bg-gray-50 p-6 md:p-8">
             <h1 className="text-3xl font-bold text-gray-800 mb-2">
-                Welcome back, <span className="text-green-600">{user}</span>!
+                Welcome back, <span className="text-green-600">{user.fullName}</span>!
             </h1>
             <p className="text-gray-500 mb-8">Your impact and scheduled services at a glance.</p>
+
+            {loading && (
+                <div className="mb-6 flex items-center gap-2 text-gray-600">
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                    <span>Loading dashboard...</span>
+                </div>
+            )}
 
             {/* Action Card & Next Pickup */}
             <div className="grid lg:grid-cols-3 gap-6 mb-8">
@@ -188,7 +170,7 @@ export default function Dashboard() {
                 <Card className="bg-white shadow-md border-t-4 border-blue-500">
                     <CardContent className="p-5">
                         <Users className="w-6 h-6 text-blue-600 mb-3" />
-                        <div className="text-3xl font-bold text-gray-900">{requests.length}</div>
+                        <div className="text-3xl font-bold text-gray-900">{totalRequests}</div>
                         <p className="text-sm text-gray-500">Total Services Requested</p>
                     </CardContent>
                 </Card>
