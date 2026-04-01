@@ -8,7 +8,7 @@ import { Link } from "react-router-dom";
 import {
     CalendarCheck,
     Truck,
-    DollarSign,
+    IndianRupee,
     Target,
     Users,
     ArrowRight,
@@ -149,7 +149,7 @@ export default function Dashboard() {
                 {/* Metric 2: Total Earning/Value */}
                 <Card className="bg-white shadow-md border-t-4 border-green-500">
                     <CardContent className="p-5">
-                        <DollarSign className="w-6 h-6 text-green-600 mb-3" />
+                        <IndianRupee className="w-6 h-6 text-green-600 mb-3" />
                         <div className="text-3xl font-bold text-gray-900">
                             {isHouseholdUser ? `₹${totalEarning}` : `${completedCount} Completed`}
                         </div>
