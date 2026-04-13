@@ -30,9 +30,14 @@ async function request(path, options = {}) {
 export const api = {
   login: (payload) => request("/auth/login", { method: "POST", body: JSON.stringify(payload) }),
   register: (payload) => request("/auth/register", { method: "POST", body: JSON.stringify(payload) }),
+  registerAdmin: (payload) => request("/auth/register-admin", { method: "POST", body: JSON.stringify(payload) }),
   createResidential: (payload) => request("/orders/residential", { method: "POST", body: JSON.stringify(payload) }),
   createBusiness: (payload) => request("/orders/business", { method: "POST", body: JSON.stringify(payload) }),
   createEnterprise: (payload) => request("/orders/enterprise", { method: "POST", body: JSON.stringify(payload) }),
   getDashboard: () => request("/orders/dashboard/me"),
   getOrdersByUser: () => request("/orders/user/me"),
+  getAllOrders: () => request("/orders"),
+  cancelOrder: (orderId) => request(`/orders/${orderId}/cancel`, { method: "PATCH" }),
+  updateOrderStatus: (orderId, status) =>
+    request(`/orders/${orderId}/status`, { method: "PATCH", body: JSON.stringify({ status }) }),
 };

@@ -8,6 +8,8 @@ import { api } from "@/lib/api";
 export default function OrderHistory() {
     const { user } = useAuth();
     const [orders, setOrders] = useState([]);
+    const [cancellingId, setCancellingId] = useState(null);
+    const [errorMessage, setErrorMessage] = useState("");
 
     useEffect(() => {
         async function loadOrders() {
@@ -15,8 +17,10 @@ export default function OrderHistory() {
             try {
                 const response = await api.getOrdersByUser();
                 setOrders(response);
+                setErrorMessage("");
             } catch {
                 setOrders([]);
+                setErrorMessage("Failed to load orders");
             }
         }
 
@@ -26,23 +30,62 @@ export default function OrderHistory() {
     const sortedRequests = [...orders].sort((a, b) => new Date(b.createdDate) - new Date(a.createdDate));
 
     const getStatusInfo = (status) => {
-        switch (status.toLowerCase()) {
+        const normalized = String(status || "").toLowerCase();
+
+        switch (normalized) {
             case 'completed':
-                return { text: "Completed", color: "text-green-600", badgeClass: "bg-green-100 text-green-800", icon: CheckCircle };
+                return { text: "Recycled", color: "text-green-600", badgeClass: "bg-green-100 text-green-800", icon: CheckCircle };
             case 'confirmed':
                 return { text: "Confirmed", color: "text-blue-500", badgeClass: "bg-blue-100 text-blue-800", icon: Clock };
             case 'pending':
                 return { text: "Pending", color: "text-yellow-500", badgeClass: "bg-yellow-100 text-yellow-800", icon: Clock };
             case 'in_progress':
-                return { text: "In Progress", color: "text-indigo-500", badgeClass: "bg-indigo-100 text-indigo-800", icon: Clock };
+                return { text: "Picked up", color: "text-indigo-500", badgeClass: "bg-indigo-100 text-indigo-800", icon: Clock };
             default:
                 return { text: "Cancelled", color: "text-red-500", badgeClass: "bg-red-100 text-red-800", icon: XCircle };
         }
     };
 
+    const isCancellable = (order) => {
+        if (!order) return false;
+        if (["cancelled", "completed"].includes(String(order.status || "").toLowerCase())) {
+            return false;
+        }
+
+        if (!order.pickupDate) {
+            return true;
+        }
+
+        const scheduled = new Date(order.pickupDate);
+        if (Number.isNaN(scheduled.getTime())) {
+            return true;
+        }
+
+        return scheduled.getTime() - Date.now() >= 24 * 60 * 60 * 1000;
+    };
+
+    async function handleCancel(orderId) {
+        setCancellingId(orderId);
+        setErrorMessage("");
+        try {
+            const updated = await api.cancelOrder(orderId);
+            setOrders((prev) => prev.map((order) => (order.id === updated.id ? updated : order)));
+        } catch (error) {
+            setErrorMessage(error.message || "Cancellation failed");
+        } finally {
+            setCancellingId(null);
+        }
+    }
+
     return (
         <div className="max-w-4xl mx-auto p-6 space-y-4 min-h-screen bg-white">
             <h2 className="text-3xl font-bold text-green-700 mb-6">Your Service History</h2>
+
+            {errorMessage ? (
+                <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-red-700">
+                    {errorMessage}
+                </div>
+            ) : null}
 
             {!sortedRequests.length && (
                 <div className="text-center p-10 bg-gray-50 rounded-lg">
@@ -88,6 +131,16 @@ export default function OrderHistory() {
                                         {statusInfo.text}
                                     </span>
                                 </Badge>
+                                {isCancellable(order) ? (
+                                    <button
+                                        type="button"
+                                        className="rounded-full border border-red-200 px-3 py-1 text-sm font-medium text-red-600 hover:bg-red-50 disabled:opacity-60"
+                                        onClick={() => handleCancel(order.id)}
+                                        disabled={cancellingId === order.id}
+                                    >
+                                        {cancellingId === order.id ? "Cancelling..." : "Cancel"}
+                                    </button>
+                                ) : null}
                             </div>
                         </CardContent>
                     </Card>

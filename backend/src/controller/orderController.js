@@ -2,8 +2,11 @@ import {
   createEnterpriseOrder,
   createBusinessOrder,
   createResidentialOrder,
+  cancelOrderByUserId,
+  getAllOrders as getAllOrdersService,
   getDashboardByUserId,
   getOrdersByUserId,
+  updateOrderStatusById,
 } from "../service/orderService.js";
 
 export async function createResidential(req, res) {
@@ -51,6 +54,36 @@ export async function getUserOrders(req, res) {
     return res.json(data);
   } catch (error) {
     return res.status(400).json({ error: error.message || "Failed to fetch user orders" });
+  }
+}
+
+export async function getAllOrders(req, res) {
+  try {
+    const data = await getAllOrdersService();
+    return res.json(data);
+  } catch (error) {
+    return res.status(400).json({ error: error.message || "Failed to fetch orders" });
+  }
+}
+
+export async function updateOrderStatus(req, res) {
+  try {
+    const orderId = Number(req.params.id);
+    const { status } = req.body || {};
+    const data = await updateOrderStatusById({ orderId, status });
+    return res.json(data);
+  } catch (error) {
+    return res.status(400).json({ error: error.message || "Failed to update order status" });
+  }
+}
+
+export async function cancelOrder(req, res) {
+  try {
+    const orderId = Number(req.params.id);
+    const data = await cancelOrderByUserId({ orderId, userId: req.user.id });
+    return res.json(data);
+  } catch (error) {
+    return res.status(400).json({ error: error.message || "Failed to cancel order" });
   }
 }
 

@@ -77,6 +77,70 @@ export async function registerUser({ fullName, email, password, phone, subscript
   return { user, token };
 }
 
+export async function registerAdminUser({ fullName, email, password, phone, subscriptionId, adminSecret }) {
+  if (!adminSecret) {
+    throw new Error("adminSecret is required");
+  }
+
+  if (!fullName || !email || !password) {
+    throw new Error("fullName, email and password are required");
+  }
+
+  const expectedSecret = process.env.ADMIN_SECRET;
+  if (!expectedSecret) {
+    return { error: "ADMIN_SECRET is not configured", statusCode: 500 };
+  }
+
+  if (adminSecret !== expectedSecret) {
+    return { error: "Invalid admin secret", statusCode: 403 };
+  }
+
+  const normalizedEmail = email.trim().toLowerCase();
+
+  const existing = await db
+    .select()
+    .from(users)
+    .where(eq(users.email, normalizedEmail))
+    .limit(1);
+
+  if (existing.length > 0) {
+    return { error: "User already exists with this email", statusCode: 409 };
+  }
+
+  const existingAdmins = await db
+    .select({ id: users.id })
+    .from(users)
+    .where(eq(users.role, "admin"))
+    .limit(1);
+
+  if (existingAdmins.length > 0) {
+    return { error: "Admin already exists", statusCode: 409 };
+  }
+
+  const created = await db
+    .insert(users)
+    .values({
+      fullName: fullName.trim(),
+      email: normalizedEmail,
+      phone: phone?.trim() || null,
+      subscriptionId: subscriptionId?.trim() || null,
+      passwordHash: hashPassword(password),
+      role: "admin",
+    })
+    .returning({
+      id: users.id,
+      fullName: users.fullName,
+      email: users.email,
+      role: users.role,
+      subscriptionId: users.subscriptionId,
+    });
+
+  const user = toUserResponse(created[0]);
+  const token = signToken(user);
+
+  return { user, token };
+}
+
 export async function loginUser({ email, password }) {
   if (!email || !password) {
     throw new Error("email and password are required");

@@ -50,6 +50,16 @@ export default function Dashboard() {
 
     const { metrics, nextPickup, requests } = dashboardData;
 
+    const statusLabels = {
+        pending: "Pending",
+        confirmed: "Confirmed",
+        in_progress: "Picked up",
+        completed: "Recycled",
+        cancelled: "Cancelled",
+    };
+
+    const formatStatus = (status) => statusLabels[String(status || "").toLowerCase()] || status;
+
     const totalWeight = metrics.totalWeight || 0;
     const totalEarning = metrics.totalEarning || 0;
     const pendingCount = metrics.pendingCount || 0;
@@ -124,7 +134,7 @@ export default function Dashboard() {
                                     Date: <span className="font-medium text-gray-800">{new Date(nextPickup.pickupDate || nextPickup.createdDate).toDateString()}</span>
                                 </p>
                                 <p className="text-gray-600">
-                                    Status: <Badge className="bg-yellow-100 text-yellow-800 border-yellow-300 capitalize" variant="secondary">{nextPickup.status}</Badge>
+                                    Status: <Badge className="bg-yellow-100 text-yellow-800 border-yellow-300" variant="secondary">{formatStatus(nextPickup.status)}</Badge>
                                 </p>
                             </>
                         ) : (
@@ -200,10 +210,10 @@ export default function Dashboard() {
                                     </p>
                                 </div>
                                 <Badge
-                                    className={`capitalize ${req.status === 'completed' ? 'bg-green-100 text-green-800 border-green-300' : 'bg-yellow-100 text-yellow-800 border-yellow-300'}`}
+                                    className={`${req.status === 'completed' ? 'bg-green-100 text-green-800 border-green-300' : 'bg-yellow-100 text-yellow-800 border-yellow-300'}`}
                                     variant="secondary"
                                 >
-                                    {req.status}
+                                    {formatStatus(req.status)}
                                 </Badge>
                             </div>
                         ))}

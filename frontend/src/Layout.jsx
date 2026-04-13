@@ -29,6 +29,10 @@ export default function Layout({ children }) {
         { name: "Pricing", path: "/pricing" },
     ];
 
+    const visibleNavItems = user?.role === "admin"
+        ? [...navItems, { name: "Admin", path: "/admin" }]
+        : navItems;
+
     return (
         <div className="min-h-screen flex flex-col bg-white">
             {/* Navbar */}
@@ -43,7 +47,7 @@ export default function Layout({ children }) {
 
                     {/* Desktop Nav */}
                     <ul className="hidden md:flex items-center space-x-8 font-medium">
-                        {navItems.map((item) => (
+                        {visibleNavItems.map((item) => (
                             <li key={item.name}>
                                 <Link
                                     to={item.path}
@@ -91,7 +95,7 @@ export default function Layout({ children }) {
                 {/* Mobile Menu */}
                 {menuOpen && (
                     <ul className="md:hidden bg-green-50 p-4 space-y-3 text-center font-medium">
-                        {navItems.map((item) => (
+                        {visibleNavItems.map((item) => (
                             <li key={item.name}>
                                 <Link
                                     to={item.path}

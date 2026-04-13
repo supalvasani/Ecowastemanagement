@@ -34,7 +34,7 @@ export default function LoginForm() {
 
             login(result);
             toast.success(`Welcome back, ${result.user.fullName}!`);
-            navigate(createPageUrl("Dashboard"));
+            navigate(result.user.role === "admin" ? "/admin" : createPageUrl("Dashboard"));
         } catch (error) {
             toast.error(error.message || "Login failed");
         } finally {
@@ -100,6 +100,13 @@ export default function LoginForm() {
                             New here?{" "}
                             <Link to="/register" className="text-green-700 font-semibold hover:underline">
                                 Create an account
+                            </Link>
+                        </p>
+
+                        <p className="text-center text-sm text-gray-600">
+                            Need to create main admin?{" "}
+                            <Link to="/setup-admin" className="text-green-700 font-semibold hover:underline">
+                                Setup Admin
                             </Link>
                         </p>
                     </form>
